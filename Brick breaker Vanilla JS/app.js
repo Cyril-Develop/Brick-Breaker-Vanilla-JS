@@ -1,6 +1,7 @@
 //************** Audio **************
 const music1 = new Audio();
 music1.src = 'ressources/music1.mp3';
+music1.volume = 0;
 const paddleCollision = new Audio();
 paddleCollision.src = 'ressources/paddleSong.ogg';
 const ballCollision = new Audio();
@@ -17,7 +18,7 @@ function jouerMusic(){
         music1.volume = 0;
     })
     document.getElementById('btnVolumeOn').addEventListener('click', () => {
-        music1.volume = 1;
+        music1.volume = 0.4;
     })
 };
 window.addEventListener('mousemove', jouerMusic); 
@@ -36,7 +37,7 @@ document.getElementById('btnRules').addEventListener('click', () => {
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
 canvas.width = 1123;
-canvas.height = 1024;
+canvas.height = 850;
 
 //************** Image **************
 let bgPaddle = new Image();
@@ -125,19 +126,21 @@ let ball = {
     directionY : -5,
     velocity : 5
 };
+
 function drawBall(){
     ctx.beginPath()
     ctx.arc(ball.positionX, ball.positionY, ball.radius, 0, 2 * Math.PI);
     ctx.fillStyle = 'crimson'
     ctx.fill()
 };
+
 function moveBall(){
     if(!spaceBar){
-        if(rightPressed && paddle.positionX < canvas.width - paddle.width){
-            ball.positionX += paddle.velocity 
+        if(rightPressed && paddle.positionX < canvas.width - paddle.width && !leftPressed){
+            ball.positionX += ball.velocity 
         } 
-        if(leftPressed && paddle.positionX > 0) {
-            ball.positionX -= paddle.velocity
+        if(leftPressed && paddle.positionX > 0 && !rightPressed) {
+            ball.positionX -= ball.velocity
         } 
     } else {
         ball.positionX += ball.directionX
@@ -211,6 +214,7 @@ function drawBlocks(){
         }
     }
 };
+
 //************** Reset **************
 function resetPaddle(){
     paddle = {
@@ -231,7 +235,6 @@ function resetBall(){
         velocity : 5
     }
 };
-
 
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
