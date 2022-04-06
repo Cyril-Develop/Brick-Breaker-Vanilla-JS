@@ -179,6 +179,8 @@ function moveBall(){
 };
 
 //************** Blocks **************
+const blueBlock = new Image();
+blueBlock.src = 'ressources/brickBlue.svg'
 let blocks = {
     numberOfColumns : 9,
     numberOfRows : 5,
@@ -205,11 +207,7 @@ function drawBlocks(){
             let blockY = y * (blocks.height + blocks.padding) + blocks.offsetTop;
             arrayBlocks[j][y].x = blockX ;
             arrayBlocks[j][y].y = blockY;
-            ctx.beginPath();
-            ctx.rect(blockX, blockY, blocks.width, blocks.height);
-            ctx.fillStyle = "gold";
-            ctx.fill();
-            ctx.closePath();
+            ctx.drawImage(blueBlock, blockX, blockY, blocks.width, blocks.height);
         }
     }
 };
