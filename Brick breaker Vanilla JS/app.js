@@ -22,8 +22,6 @@ function jouerMusic(){
 };
 window.addEventListener('mousemove', jouerMusic); 
 
-
-
 //************** Bouton rejouer **************
 const btnRejouer = document.getElementById('btnRejouer')
 btnRejouer.addEventListener('click', () => {
@@ -35,15 +33,10 @@ document.getElementById('btnRules').addEventListener('click', () => {
     document.getElementById('containerRules').classList.toggle('active')  
 });
 
-
-
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
 canvas.width = 1123;
 canvas.height = 1024;
-
-
-
 
 //************** Image **************
 let bgPaddle = new Image();
