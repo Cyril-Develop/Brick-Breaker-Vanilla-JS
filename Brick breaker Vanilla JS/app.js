@@ -1,15 +1,26 @@
-//************** Audio **************
-const music1 = new Audio();
-music1.src = 'ressources/music1.mp3';
-music1.volume = 0;
-const paddleCollision = new Audio();
-paddleCollision.src = 'ressources/paddleSong.ogg';
-const ballCollision = new Audio();
-ballCollision.src = 'ressources/ballSong.ogg';
-const gameOverSong = new Audio();
-gameOverSong.src = 'ressources/gameOver.wav';
-const loseLife = new Audio();
-loseLife.src = 'ressources/loseLife.wav';
+//************** Initialisation Canvas **************
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext("2d");
+canvas.style.border = '2px solid white';
+
+canvas.width = 1400;
+canvas.height = 850;
+
+//************** Score **************
+let score = 0;
+function drawScore(){
+    ctx.font = '48px serif';
+    ctx.textAlign = 'center'
+    ctx.fillStyle = 'black'
+    ctx.shadowBlur = 0;
+    ctx.fillText('Score : ' + score, 700, 40);
+}
+
+//************** Image **************
+const bgPaddlelvl1 = new Image();
+bgPaddlelvl1.src = 'ressources/paddleBG.jpg';
+const bgCanvaslvl1 = new Image();
+bgCanvaslvl1.src = 'ressources/BG.jpg';
 
 //************** Envoie de la musique de fond **************
 function jouerMusic(){
@@ -29,21 +40,6 @@ btnRejouer.addEventListener('click', () => {
     location.reload()
 });
 
-document.getElementById('btnRules').addEventListener('click', () => {
-    document.getElementById('rules').classList.toggle('active')  
-    document.getElementById('containerRules').classList.toggle('active')  
-});
-
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext("2d");
-canvas.width = 1123;
-canvas.height = 850;
-
-//************** Image **************
-let bgPaddle = new Image();
-bgPaddle.src = 'ressources/paddleBG.jpg';
-let bgCanvas = new Image();
-bgCanvas.src = 'ressources/BG.jpg';
 //************** Variables **************
 let rightPressed = false;
 let leftPressed = false;
@@ -60,6 +56,8 @@ class heart {
         this.height = 50;
     }
     draw(ctx){
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 5;
         ctx.drawImage(this.image, this.positionX, 0, this.width, this.height)
     }
 };
@@ -90,25 +88,27 @@ function inputHandler(){
 };
 
 function canvasBg(){
-    ctx.drawImage(bgCanvas, 0, 50, canvas.width, canvas.height)
+    ctx.drawImage(bgCanvaslvl1, 0, 50, canvas.width, canvas.height)
 };
 
 //************** PADDLE **************
+let PADDLE_WIDTH = 250;
+let PADDLE_HEIGHT = 40;
+let PADDLE_MARGIN_BOTTOM = 30;
+
 let paddle = {
-    width : 300,
-    height : 50,
-    positionX : (canvas.width - 300) / 2,
-    positionY : canvas.height - 70,
+    positionX : (canvas.width - PADDLE_WIDTH) / 2,
+    positionY : (canvas.height - PADDLE_HEIGHT) - PADDLE_MARGIN_BOTTOM,
     velocity : 5
 };
 function drawPaddle(){
     ctx.shadowColor = 'black';
     ctx.shadowBlur = 5;
-    ctx.drawImage(bgPaddle, paddle.positionX, paddle.positionY, paddle.width, paddle.height)
+    ctx.drawImage(bgPaddlelvl1, paddle.positionX, paddle.positionY, PADDLE_WIDTH, PADDLE_HEIGHT)
 };
 function movePaddle(){
     inputHandler()
-    if(rightPressed && paddle.positionX < canvas.width - paddle.width){
+    if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH){
         paddle.positionX += paddle.velocity
     }
     if(leftPressed && paddle.positionX > 0){
@@ -118,9 +118,9 @@ function movePaddle(){
 
 //************** Ball **************
 let ball = {
-    radius : 15,
-    positionX : paddle.positionX + paddle.width/2,
-    positionY : paddle.positionY - 15,
+    radius : 10,
+    positionX : paddle.positionX + PADDLE_WIDTH/2,
+    positionY : paddle.positionY - 10,
     //déplacement aleatoire sur x au depart
     directionX : 3 * (Math.random() * 2 - 1),
     directionY : -5,
@@ -136,7 +136,7 @@ function drawBall(){
 
 function moveBall(){
     if(!spaceBar){
-        if(rightPressed && paddle.positionX < canvas.width - paddle.width && !leftPressed){
+        if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH && !leftPressed){
             ball.positionX += ball.velocity 
         } 
         if(leftPressed && paddle.positionX > 0 && !rightPressed) {
@@ -173,7 +173,7 @@ function moveBall(){
     }
     //************** Collision avec paddle **************
     if(ball.positionX + ball.radius > paddle.positionX && 
-    ball.positionX - ball.radius < paddle.positionX + paddle.width &&
+    ball.positionX - ball.radius < paddle.positionX + PADDLE_WIDTH &&
     ball.positionY + ball.radius > paddle.positionY){
         paddleCollision.play()
         ball.dx = ball.velocity
@@ -182,35 +182,104 @@ function moveBall(){
 };
 
 //************** Blocks **************
-const blueBlock = new Image();
-blueBlock.src = 'ressources/brickBlue.svg'
 let blocks = {
-    numberOfColumns : 9,
-    numberOfRows : 5,
-    width : 100,
-    height : 40,
-    padding : 10,
-    offsetTop : 70,
-    offsetLeft : 70
+    blocksBlue : {
+        numberOfColumns : 15,
+        numberOfRows : 5,
+        width : 75,
+        height : 20,
+        padding : 5,
+        offsetTop : 70,
+        offsetLeft : 100,
+    },  
+    blocksGrey : {
+        numberOfColumns : 15,
+        numberOfRows : 1,
+        width : 75,
+        height : 20,
+        padding : 5,
+        offsetTop : 70,
+        offsetLeft : 100,
+    }  
 };
-let arrayBlocks = [];
+let arrayBlocksBlue = [];
+let arrayBlocksGrey = [];
 
-for(let j = 0; j < blocks.numberOfColumns; j++){
-    arrayBlocks[j] = [];
-    for(let y = 0; y < blocks.numberOfRows; y++){
-        arrayBlocks[j][y] = { x:0, y:0 }
+for(let j = 0; j < blocks.blocksBlue.numberOfColumns; j++){
+    arrayBlocksBlue[j] = [];
+    for(let y = 0; y < blocks.blocksBlue.numberOfRows; y++){
+        arrayBlocksBlue[j][y] = { x:0, y:0, status: 1 }
     }
 };
-
+for(let j = 0; j < blocks.blocksGrey.numberOfColumns; j++){
+    arrayBlocksGrey[j] = [];
+    for(let y = 0; y < blocks.blocksGrey.numberOfRows; y++){
+        arrayBlocksGrey[j][y] = { x:0, y:0}
+    }
+};
 //************** Dessine les blocks **************
-function drawBlocks(){
-   for(let j = 0; j < blocks.numberOfColumns; j++) {
-        for(let y = 0; y < blocks.numberOfRows; y++) {
-            let blockX = j * (blocks.width + blocks.padding) + blocks.offsetLeft;
-            let blockY = y * (blocks.height + blocks.padding) + blocks.offsetTop;
-            arrayBlocks[j][y].x = blockX ;
-            arrayBlocks[j][y].y = blockY;
-            ctx.drawImage(blueBlock, blockX, blockY, blocks.width, blocks.height);
+function drawBlueBlocks(){
+   for(let j = 0; j < blocks.blocksBlue.numberOfColumns; j++) {
+        for(let y = 0; y < blocks.blocksBlue.numberOfRows; y++) {
+            if(arrayBlocksBlue[j][y].status == 1){
+                let blockBlueX = (j * (blocks.blocksBlue.width + blocks.blocksBlue.padding)) + blocks.blocksBlue.offsetLeft;
+                let blockBlueY = (y * (blocks.blocksBlue.height + blocks.blocksBlue.padding)) + blocks.blocksBlue.offsetTop;
+                arrayBlocksBlue[j][y].x = blockBlueX ;
+                arrayBlocksBlue[j][y].y = blockBlueY;
+                ctx.beginPath();
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 5;
+                ctx.rect(blockBlueX, blockBlueY, blocks.blocksBlue.width, blocks.blocksBlue.height);
+                ctx.fillStyle = "#0095DD";
+                ctx.fill();
+                ctx.closePath(); 
+            }
+        }
+    }
+};
+function drawGreyBlocks(){
+    for(let j = 0; j < blocks.blocksGrey.numberOfColumns; j++) {
+        for(let y = 0; y < blocks.blocksGrey.numberOfRows; y++) {
+            let blockGreyX = (j * (blocks.blocksGrey.width + blocks.blocksGrey.padding)) + blocks.blocksGrey.offsetLeft;
+            let blockGreyY = (5 * (blocks.blocksGrey.height + blocks.blocksGrey.padding)) + blocks.blocksGrey.offsetTop;
+            arrayBlocksGrey[j][y].x = blockGreyX ;
+            arrayBlocksGrey[j][y].y = blockGreyY;
+            ctx.beginPath();
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 5;
+            ctx.rect(blockGreyX, blockGreyY, blocks.blocksGrey.width, blocks.blocksGrey.height);
+            ctx.fillStyle = "lightgrey";
+            ctx.fill();
+            ctx.closePath(); 
+            
+        }
+    }
+}
+//************** Collision avec les blocks **************
+function collisionBlocks() {
+    for(let j = 0; j < blocks.blocksBlue.numberOfColumns; j++) {
+        for(let y = 0; y < blocks.blocksBlue.numberOfRows; y++) {
+            let b = arrayBlocksBlue[j][y];
+            if(b.status == 1 && ball.positionX + ball.radius > b.x &&
+            ball.positionX - ball.radius < b.x + blocks.blocksBlue.width &&
+            ball.positionY + ball.radius > b.y &&
+            ball.positionY - ball.radius < b.y + blocks.blocksBlue.height) {
+                explosionBlock.play()
+                ball.directionY *= -1
+                b.status = 0;
+                score += 20;
+            }         
+        }
+    };
+    for(let j = 0; j < blocks.blocksGrey.numberOfColumns; j++) {
+        for(let y = 0; y < blocks.blocksGrey.numberOfRows; y++) {
+            let b = arrayBlocksGrey[j][y];
+            if(ball.positionX + ball.radius > b.x &&
+            ball.positionX + ball.radius < b.x + blocks.blocksGrey.width &&
+            ball.positionY + ball.radius > b.y &&
+            ball.positionY - ball.radius < b.y + blocks.blocksGrey.height) {
+                ball.directionY *= -1
+            }         
         }
     }
 };
@@ -218,18 +287,16 @@ function drawBlocks(){
 //************** Reset **************
 function resetPaddle(){
     paddle = {
-        width : 300,
-        height : 50,
-        positionX : (canvas.width - 300) / 2,
-        positionY : canvas.height - 70,
+        positionX : (canvas.width - PADDLE_WIDTH) / 2,
+        positionY : (canvas.height - PADDLE_HEIGHT) - PADDLE_MARGIN_BOTTOM,
         velocity : 5
     }
 };
 function resetBall(){
     ball = {
-        radius : 15,
-        positionX : paddle.positionX + paddle.width/2,
-        positionY : paddle.positionY - 15,
+        radius : 10,
+        positionX : paddle.positionX + PADDLE_WIDTH/2,
+        positionY : paddle.positionY - 10,
         directionX : 3 * (Math.random() * 2 - 1),
         directionY : -5,
         velocity : 5
@@ -244,11 +311,16 @@ function animate(){
     movePaddle();
     drawBall();
     moveBall();
-    drawBlocks();
+    drawBlueBlocks();
+    drawGreyBlocks();
+    collisionBlocks();
+    drawScore()
 
     arrayLife.forEach((img) => {
         img.draw(ctx)
     });
+
+    
 
     if(!gameOver)requestAnimationFrame(animate);
 }
