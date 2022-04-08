@@ -65,27 +65,28 @@ let arrayLife = [];
 arrayLife.push(new heart(0), new heart(50), new heart(100));
     
 //************** Gestionnaire de touches **************
-function inputHandler(){
-    window.addEventListener('keydown', (e) => {
-        if(e.key === 'ArrowRight') {
-            rightPressed = true;
-        }
-        if(e.key === 'ArrowLeft') {
-            leftPressed = true;
-        }
-    })
-    window.addEventListener('keyup', (e) => {
-        if(e.key === 'ArrowRight') {
-            rightPressed = false;
-        }
-        if(e.key === 'ArrowLeft') {
-            leftPressed = false;
-        }
-        if(e.key === ' ') {
-            spaceBar = true;
-        }
-    })
-};
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+function keyDownHandler(e) {
+    if(e.key === 'ArrowRight') {
+        rightPressed = true;
+    }
+    else if(e.key === 'ArrowLeft') {
+        leftPressed = true;
+    }
+}
+function keyUpHandler(e) {
+    if(e.key === 'ArrowRight') {
+        rightPressed = false;
+    }
+    else if(e.key === 'ArrowLeft') {
+        leftPressed = false;
+    }
+    else if(e.key === ' ') {
+        spaceBar = true;
+    }
+}
 
 function canvasBg(){
     ctx.drawImage(bgCanvaslvl1, 0, 50, canvas.width, canvas.height)
@@ -107,7 +108,6 @@ function drawPaddle(){
     ctx.drawImage(bgPaddlelvl1, paddle.positionX, paddle.positionY, PADDLE_WIDTH, PADDLE_HEIGHT)
 };
 function movePaddle(){
-    inputHandler()
     if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH){
         paddle.positionX += paddle.velocity
     }
@@ -175,9 +175,21 @@ function moveBall(){
     if(ball.positionX + ball.radius > paddle.positionX && 
     ball.positionX - ball.radius < paddle.positionX + PADDLE_WIDTH &&
     ball.positionY + ball.radius > paddle.positionY){
+
         paddleCollision.play()
+
         ball.dx = ball.velocity
         ball.directionY = -ball.velocity
+        
+/////////////////////////////////////////////////////////////////////
+
+        // let collidePointP1 = ball.positionX - (paddlePlayerOne.positionX + PADDLE_P1_WIDTH / 2);
+        // collidePointP1 = collidePointP1 / (PADDLE_P1_WIDTH / 2);
+
+        // let anglecollidePointP1 = collidePointP1 * Math.PI / 3;
+
+        // ball.dx = velocity  * Math.sin(anglecollidePointP1)
+        // ball.dy = -velocity * Math.cos(anglecollidePointP1)
     }
 };
 
