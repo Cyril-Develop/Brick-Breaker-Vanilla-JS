@@ -8,6 +8,7 @@ canvas.height = 850;
 
 //************** Score **************
 let score = 0;
+
 function drawScore(){
     ctx.font = '48px serif';
     ctx.textAlign = 'center'
@@ -100,7 +101,7 @@ let PADDLE_MARGIN_BOTTOM = 30;
 let paddle = {
     positionX : (canvas.width - PADDLE_WIDTH) / 2,
     positionY : (canvas.height - PADDLE_HEIGHT) - PADDLE_MARGIN_BOTTOM,
-    velocity : 5
+    dx : 8
 };
 function drawPaddle(){
     ctx.shadowColor = 'black';
@@ -109,10 +110,10 @@ function drawPaddle(){
 };
 function movePaddle(){
     if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH){
-        paddle.positionX += paddle.velocity
+        paddle.positionX += paddle.dx
     }
     if(leftPressed && paddle.positionX > 0){
-        paddle.positionX -= paddle.velocity
+        paddle.positionX -= paddle.dx
     }
 };
 
@@ -122,9 +123,9 @@ let ball = {
     positionX : paddle.positionX + PADDLE_WIDTH/2,
     positionY : paddle.positionY - 10,
     //déplacement aleatoire sur x au depart
-    directionX : 3 * (Math.random() * 2 - 1),
+    directionX : 5 * (Math.random() * 2 - 1),
     directionY : -5,
-    velocity : 5
+    velocity : 5 
 };
 
 function drawBall(){
@@ -137,10 +138,10 @@ function drawBall(){
 function moveBall(){
     if(!spaceBar){
         if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH && !leftPressed){
-            ball.positionX += ball.velocity 
+            ball.positionX += paddle.dx 
         } 
         if(leftPressed && paddle.positionX > 0 && !rightPressed) {
-            ball.positionX -= ball.velocity
+            ball.positionX -= paddle.dx
         } 
     } else {
         ball.positionX += ball.directionX
@@ -148,15 +149,15 @@ function moveBall(){
     }
     
     //************** Collision avec mur **************
-    if(ball.positionX + ball.radius > canvas.width || ball.positionX < 0 + ball.radius) {
+    if(ball.positionX + ball.directionX > canvas.width - ball.radius || ball.positionX + ball.directionX < ball.radius) {
         ballCollision.play()
-        ball.directionX *= -1
+        ball.directionX *= -1;
     }
-    if(ball.positionY < 50 + ball.radius) {
+    if(ball.positionY + ball.directionY < 50 + ball.radius) {
         ballCollision.play()
-        ball.directionY *= -1
+        ball.directionY *= -1;
     } 
-    if(ball.positionY + ball.radius > canvas.height) {
+    if(ball.positionY + ball.directionY > canvas.height - ball.radius) {
         arrayLife.pop()
         loseLife.play()
         if(arrayLife.length == 0) {
@@ -178,130 +179,94 @@ function moveBall(){
 
         paddleCollision.play()
 
-        ball.dx = ball.velocity
-        ball.directionY = -ball.velocity
-        
-/////////////////////////////////////////////////////////////////////
+        let collidePoint = ball.positionX - (paddle.positionX + PADDLE_WIDTH / 2);
+        collidePoint = collidePoint / (PADDLE_WIDTH / 2);
 
-        // let collidePointP1 = ball.positionX - (paddlePlayerOne.positionX + PADDLE_P1_WIDTH / 2);
-        // collidePointP1 = collidePointP1 / (PADDLE_P1_WIDTH / 2);
+        let angle = collidePoint * Math.PI / 3;
 
-        // let anglecollidePointP1 = collidePointP1 * Math.PI / 3;
-
-        // ball.dx = velocity  * Math.sin(anglecollidePointP1)
-        // ball.dy = -velocity * Math.cos(anglecollidePointP1)
+        ball.directionX = ball.velocity * Math.sin(angle);
+        ball.directionY = -ball.velocity * Math.cos(angle);
     }
 };
 
-//************** Blocks **************
-let blocks = {
-    blocksBlue : {
-        numberOfColumns : 15,
-        numberOfRows : 5,
-        width : 75,
-        height : 20,
-        padding : 5,
-        offsetTop : 70,
-        offsetLeft : 100,
-    },  
-    blocksGrey : {
-        numberOfColumns : 15,
-        numberOfRows : 1,
-        width : 75,
-        height : 20,
-        padding : 5,
-        offsetTop : 70,
-        offsetLeft : 100,
-    }  
+//************** Bricks **************
+let bricksProp = {
+    columns : 15,
+    rows : 5,
+    width : 75,
+    height : 20,
+    padding : 5,
+    offsetTop : 70,
+    offsetLeft : 100,
+    fillColor : '#6568F3',
+    visible : true
 };
-let arrayBlocksBlue = [];
-let arrayBlocksGrey = [];
 
-for(let j = 0; j < blocks.blocksBlue.numberOfColumns; j++){
-    arrayBlocksBlue[j] = [];
-    for(let y = 0; y < blocks.blocksBlue.numberOfRows; y++){
-        arrayBlocksBlue[j][y] = { x:0, y:0, status: 1 }
-    }
-};
-for(let j = 0; j < blocks.blocksGrey.numberOfColumns; j++){
-    arrayBlocksGrey[j] = [];
-    for(let y = 0; y < blocks.blocksGrey.numberOfRows; y++){
-        arrayBlocksGrey[j][y] = { x:0, y:0}
-    }
-};
-//************** Dessine les blocks **************
-function drawBlueBlocks(){
-   for(let j = 0; j < blocks.blocksBlue.numberOfColumns; j++) {
-        for(let y = 0; y < blocks.blocksBlue.numberOfRows; y++) {
-            if(arrayBlocksBlue[j][y].status == 1){
-                let blockBlueX = (j * (blocks.blocksBlue.width + blocks.blocksBlue.padding)) + blocks.blocksBlue.offsetLeft;
-                let blockBlueY = (y * (blocks.blocksBlue.height + blocks.blocksBlue.padding)) + blocks.blocksBlue.offsetTop;
-                arrayBlocksBlue[j][y].x = blockBlueX ;
-                arrayBlocksBlue[j][y].y = blockBlueY;
-                ctx.beginPath();
-                ctx.shadowColor = 'black';
-                ctx.shadowBlur = 5;
-                ctx.rect(blockBlueX, blockBlueY, blocks.blocksBlue.width, blocks.blocksBlue.height);
-                ctx.fillStyle = "#0095DD";
-                ctx.fill();
-                ctx.closePath(); 
+let bricks = [];
+let bricksCount = bricksProp.columns * bricksProp.rows;
+//************** Crée les bricks **************
+
+function createBricks(){
+    for (let r = 0; r < bricksProp.rows; r++) {
+        bricks[r] = [];
+        for (let c = 0; c < bricksProp.columns; c++) {
+            bricks[r][c] = {
+                x: c * (bricksProp.width + bricksProp.padding) + bricksProp.offsetLeft,
+                y: r * (bricksProp.height + bricksProp.padding) + bricksProp.offsetTop,
+                status: true,
+                //permet de récupérer toutes les propriétés de bricksProp pour chaque élément
+                ...bricksProp
             }
         }
     }
 };
-function drawGreyBlocks(){
-    for(let j = 0; j < blocks.blocksGrey.numberOfColumns; j++) {
-        for(let y = 0; y < blocks.blocksGrey.numberOfRows; y++) {
-            let blockGreyX = (j * (blocks.blocksGrey.width + blocks.blocksGrey.padding)) + blocks.blocksGrey.offsetLeft;
-            let blockGreyY = (5 * (blocks.blocksGrey.height + blocks.blocksGrey.padding)) + blocks.blocksGrey.offsetTop;
-            arrayBlocksGrey[j][y].x = blockGreyX ;
-            arrayBlocksGrey[j][y].y = blockGreyY;
-            ctx.beginPath();
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 5;
-            ctx.rect(blockGreyX, blockGreyY, blocks.blocksGrey.width, blocks.blocksGrey.height);
-            ctx.fillStyle = "lightgrey";
-            ctx.fill();
-            ctx.closePath(); 
-            
-        }
-    }
-}
-//************** Collision avec les blocks **************
-function collisionBlocks() {
-    for(let j = 0; j < blocks.blocksBlue.numberOfColumns; j++) {
-        for(let y = 0; y < blocks.blocksBlue.numberOfRows; y++) {
-            let b = arrayBlocksBlue[j][y];
-            if(b.status == 1 && ball.positionX + ball.radius > b.x &&
-            ball.positionX - ball.radius < b.x + blocks.blocksBlue.width &&
-            ball.positionY + ball.radius > b.y &&
-            ball.positionY - ball.radius < b.y + blocks.blocksBlue.height) {
-                explosionBlock.play()
-                ball.directionY *= -1
-                b.status = 0;
-                score += 20;
-            }         
-        }
-    };
-    for(let j = 0; j < blocks.blocksGrey.numberOfColumns; j++) {
-        for(let y = 0; y < blocks.blocksGrey.numberOfRows; y++) {
-            let b = arrayBlocksGrey[j][y];
-            if(ball.positionX + ball.radius > b.x &&
-            ball.positionX + ball.radius < b.x + blocks.blocksGrey.width &&
-            ball.positionY + ball.radius > b.y &&
-            ball.positionY - ball.radius < b.y + blocks.blocksGrey.height) {
-                ball.directionY *= -1
-            }         
-        }
-    }
+createBricks()
+
+//************** Dessine les bricks **************
+function drawBricks(){
+    bricks.forEach(column => {
+        column.forEach(brick => {
+            if(brick.status){
+                ctx.beginPath();
+                ctx.rect(brick.x, brick.y, brick.width, brick.height)
+                ctx.fillStyle = brick.fillColor;
+                ctx.fill();
+                ctx.closePath();
+            }
+        })
+    })
 };
+
+//************** Collision Ball Bricks **************
+function collisionBallBricks(){
+    bricks.forEach(column => {
+        column.forEach(brick => {
+            if(brick.status){
+               if(ball.positionX + ball.radius > brick.x &&
+                ball.positionX - ball.radius < brick.x + brick.width &&
+                ball.positionY + ball.radius > brick.y && 
+                ball.positionY - ball.radius < brick.y + brick.height) {
+                    explosionBlock.play()
+                    ball.directionY *= -1
+                    brick.status = false
+                    score +=10;
+                    if(bricksCount = 75) {
+                        //envoie level suivant
+                        nextLevel.play()
+                    }
+                }
+            }
+        })
+    })
+};
+
 
 //************** Reset **************
 function resetPaddle(){
     paddle = {
         positionX : (canvas.width - PADDLE_WIDTH) / 2,
         positionY : (canvas.height - PADDLE_HEIGHT) - PADDLE_MARGIN_BOTTOM,
-        velocity : 5
+        dx : 8
     }
 };
 function resetBall(){
@@ -309,11 +274,22 @@ function resetBall(){
         radius : 10,
         positionX : paddle.positionX + PADDLE_WIDTH/2,
         positionY : paddle.positionY - 10,
-        directionX : 3 * (Math.random() * 2 - 1),
+        //déplacement aleatoire sur x au depart
+        directionX : 5 * (Math.random() * 2 - 1),
         directionY : -5,
-        velocity : 5
+        velocity : 5 
     }
 };
+
+
+
+
+//**************************** NIVEAU 2 ****************************
+
+
+function startLevelTwo(){}
+    
+
 
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -323,9 +299,8 @@ function animate(){
     movePaddle();
     drawBall();
     moveBall();
-    drawBlueBlocks();
-    drawGreyBlocks();
-    collisionBlocks();
+    drawBricks()
+    collisionBallBricks()
     drawScore()
 
     arrayLife.forEach((img) => {
