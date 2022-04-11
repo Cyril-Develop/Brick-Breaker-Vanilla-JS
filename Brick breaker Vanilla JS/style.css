@@ -95,16 +95,18 @@ body{
     top: 55%;
     left: 50%;
     transform: translate(-50%,-50%);
-    width: 200px;
+    width: 250px;
     padding: 20px;
     font-size: 40px;
+    font-weight: 900;
     letter-spacing: 3px;
+    text-shadow: 0 2px 8px black;
     box-shadow: -2px -2px 2px 2px rgba(255, 255, 255, 0.205),
     2px 2px 5px 2px rgb(0, 0, 0);
     cursor: pointer;
     border-radius: 10px;
     color: white;
-    background-color: #333;
+    background-color: transparent;
     opacity: 0;
     visibility: hidden;
     transition: all 0.4s ease-in-out;
