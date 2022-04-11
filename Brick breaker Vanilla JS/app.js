@@ -8,6 +8,8 @@ canvas.height = 850;
 
 //************** Score **************
 let score = 0;
+let level = 1;
+MAX_LEVEL = 2;
 
 function drawScore(){
     ctx.font = '48px serif';
@@ -16,12 +18,12 @@ function drawScore(){
     ctx.shadowBlur = 0;
     ctx.fillText('Score : ' + score, 700, 40);
 }
-
-//************** Image **************
-const bgPaddlelvl1 = new Image();
-bgPaddlelvl1.src = 'ressources/paddleBG.jpg';
-const bgCanvaslvl1 = new Image();
-bgCanvaslvl1.src = 'ressources/BG.jpg';
+//************** Background game **************
+let bgCanvas = new Image();
+bgCanvas.src = 'ressources/BG.png';
+function canvasBg(){
+    ctx.drawImage(bgCanvas, 0, 50, canvas.width, canvas.height)
+};
 
 //************** Envoie de la musique de fond **************
 function jouerMusic(){
@@ -64,6 +66,12 @@ class heart {
 };
 let arrayLife = [];
 arrayLife.push(new heart(0), new heart(50), new heart(100));
+
+function showStats(){
+    arrayLife.forEach((img) => {
+        img.draw(ctx)
+    });
+}
     
 //************** Gestionnaire de touches **************
 document.addEventListener("keydown", keyDownHandler, false);
@@ -89,11 +97,9 @@ function keyUpHandler(e) {
     }
 }
 
-function canvasBg(){
-    ctx.drawImage(bgCanvaslvl1, 0, 50, canvas.width, canvas.height)
-};
-
 //************** PADDLE **************
+let bgPaddle = new Image();
+bgPaddle.src = 'ressources/paddleBG.png';
 let PADDLE_WIDTH = 250;
 let PADDLE_HEIGHT = 40;
 let PADDLE_MARGIN_BOTTOM = 30;
@@ -106,7 +112,7 @@ let paddle = {
 function drawPaddle(){
     ctx.shadowColor = 'black';
     ctx.shadowBlur = 5;
-    ctx.drawImage(bgPaddlelvl1, paddle.positionX, paddle.positionY, PADDLE_WIDTH, PADDLE_HEIGHT)
+    ctx.drawImage(bgPaddle, paddle.positionX, paddle.positionY, PADDLE_WIDTH, PADDLE_HEIGHT)
 };
 function movePaddle(){
     if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH){
@@ -161,8 +167,8 @@ function moveBall(){
         arrayLife.pop()
         loseLife.play()
         if(arrayLife.length == 0) {
-            music1.pause()
             loseLife.pause()
+            music1.pause()
             music1.volume = 0;
             gameOverSong.play()
             gameOver = true
@@ -192,7 +198,7 @@ function moveBall(){
 //************** Bricks **************
 let bricksProp = {
     columns : 15,
-    rows : 5,
+    rows : 4,
     width : 75,
     height : 20,
     padding : 5,
@@ -201,12 +207,10 @@ let bricksProp = {
     fillColor : '#6568F3',
     visible : true
 };
-
 let bricks = [];
-let bricksCount = bricksProp.columns * bricksProp.rows;
 //************** Crée les bricks **************
 
-function createBricks(){
+function createBlueBricks(){
     for (let r = 0; r < bricksProp.rows; r++) {
         bricks[r] = [];
         for (let c = 0; c < bricksProp.columns; c++) {
@@ -220,7 +224,7 @@ function createBricks(){
         }
     }
 };
-createBricks()
+createBlueBricks()
 
 //************** Dessine les bricks **************
 function drawBricks(){
@@ -246,14 +250,11 @@ function collisionBallBricks(){
                 ball.positionX - ball.radius < brick.x + brick.width &&
                 ball.positionY + ball.radius > brick.y && 
                 ball.positionY - ball.radius < brick.y + brick.height) {
+                    
                     explosionBlock.play()
                     ball.directionY *= -1
                     brick.status = false
                     score +=10;
-                    if(bricksCount = 75) {
-                        //envoie level suivant
-                        nextLevel.play()
-                    }
                 }
             }
         })
@@ -282,33 +283,99 @@ function resetBall(){
 };
 
 
-
-
 //**************************** NIVEAU 2 ****************************
 
+//************** Brick incassable du level2 **************
 
-function startLevelTwo(){}
+let greyBrickProp = {
+    y : 400,
+    x : 0,
+    width : 850,
+    height : 20,
+    fillColor : '#D3D4CE',
+}    
+
+function drawGreyBrick(){
+    if(level == 2) {
+        ctx.beginPath();
+        ctx.rect(greyBrickProp.x, greyBrickProp.y, greyBrickProp.width, greyBrickProp.height)
+        ctx.fillStyle = greyBrickProp.fillColor;
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+//************** Collision Ball brick incassable **************
+function collisionBallGreyBrick(){
+    if(level == 2) {
+        if(ball.positionX + ball.radius > greyBrickProp.x &&
+        ball.positionX - ball.radius < greyBrickProp.x + greyBrickProp.width &&
+        ball.positionY + ball.radius > greyBrickProp.y && 
+        ball.positionY - ball.radius < greyBrickProp.y + greyBrickProp.height) {
+            ball.directionY *= -1
+        }
+    } 
+};          
+
+function nextLevel(){
     
+   let isLevelUp = true;
 
+   for(let r = 0; r < bricksProp.rows; r++) {
+       for(let c = 0; c < bricksProp.columns; c++) {
+           isLevelUp = isLevelUp && !bricks[r][c].status;
+       }
+   }
+
+    if(isLevelUp){
+        levelUp.play()
+        if (level >= MAX_LEVEL){
+            
+            winGame.play();
+            music1.pause()
+            music1.volume = 0;
+            gameOver = true
+            btnRejouer.classList.add('active')
+            return
+        }
+        
+        
+        // bgPaddle.src = 'ressources/paddleBG2.png';
+        // drawPaddle();
+        bgCanvas.src = 'ressources/BG2.png';
+        canvasBg();
+        createBlueBricks();
+        ball.velocity += .5;
+        resetBall();
+        resetPaddle();
+        level++
+    }
+
+}
+    
+function draw(){
+    canvasBg();
+    drawPaddle();
+    drawBall();
+    drawBricks()
+    drawGreyBrick()
+    drawScore()
+}
+
+function update(){
+    nextLevel();
+    movePaddle();
+    moveBall();
+    collisionBallBricks();
+    collisionBallGreyBrick()
+}
 
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    canvasBg();
-    drawPaddle();
-    movePaddle();
-    drawBall();
-    moveBall();
-    drawBricks()
-    collisionBallBricks()
-    drawScore()
-
-    arrayLife.forEach((img) => {
-        img.draw(ctx)
-    });
-
+    draw();
+    update();
+    showStats();
     
-
     if(!gameOver)requestAnimationFrame(animate);
 }
 animate()
