@@ -20,7 +20,7 @@ function drawScore(){
 }
 //************** Background game **************
 let bgCanvas = new Image();
-bgCanvas.src = 'ressources/BG.png';
+bgCanvas.src = 'ressources/img/BG.png';
 function canvasBg(){
     ctx.drawImage(bgCanvas, 0, 50, canvas.width, canvas.height)
 };
@@ -32,7 +32,7 @@ function jouerMusic(){
         music1.volume = 0;
     })
     document.getElementById('btnVolumeOn').addEventListener('click', () => {
-        music1.volume = 0.4;
+        music1.volume = 0.6;
     })
 };
 window.addEventListener('mousemove', jouerMusic); 
@@ -54,7 +54,7 @@ class heart {
     constructor(positionX){
         this.positionX = positionX
         this.image = new Image();
-        this.image.src = 'ressources/life.png';
+        this.image.src = 'ressources/img/life.png';
         this.width = 50;
         this.height = 50;
     }
@@ -99,7 +99,7 @@ function keyUpHandler(e) {
 
 //************** PADDLE **************
 let bgPaddle = new Image();
-bgPaddle.src = 'ressources/paddleBG.png';
+bgPaddle.src = 'ressources/img/paddleBG.png';
 let PADDLE_WIDTH = 250;
 let PADDLE_HEIGHT = 40;
 let PADDLE_MARGIN_BOTTOM = 30;
@@ -255,6 +255,7 @@ function collisionBallBricks(){
                     ball.directionY *= -1
                     brick.status = false
                     score +=10;
+
                 }
             }
         })
@@ -282,7 +283,6 @@ function resetBall(){
     }
 };
 
-
 //**************************** NIVEAU 2 ****************************
 
 //************** Brick incassable du level2 **************
@@ -290,7 +290,7 @@ function resetBall(){
 let greyBrickProp = {
     y : 400,
     x : 0,
-    width : 850,
+    width : 1000,
     height : 20,
     fillColor : '#D3D4CE',
 }    
@@ -339,9 +339,11 @@ function nextLevel(){
         }
         
         
-        // bgPaddle.src = 'ressources/paddleBG2.png';
-        // drawPaddle();
-        bgCanvas.src = 'ressources/BG2.png';
+        if(level == 4) {
+            bgPaddle.src = 'ressources/paddleBG2.png';
+            drawPaddle();
+        }
+        bgCanvas.src = 'ressources/img/BG2.png';
         canvasBg();
         createBlueBricks();
         ball.velocity += .5;
@@ -349,8 +351,44 @@ function nextLevel(){
         resetPaddle();
         level++
     }
-
 }
+
+
+//************** horodotage **************
+let timeToNextPenalty = 0;
+let penaltynInterval = 5000;
+let lastTime = 0;
+
+//************** Penalite **************
+const redMalus = new Image();
+redMalus.src = 'ressources/img/redMalus.png'
+const purpleMalus = new Image();
+purpleMalus.src = 'ressources/img/purpleMalus.png'
+
+class Penalty {
+    constructor(image){
+        this.image = image;
+        this.width = 100;
+        this.height = 100;
+        this.x = Math.random() * (canvas.width - this.width)
+        this.y = Math.random() * (400 - 100) + 100;
+        this.speed = 2;
+        this.markForDeletion = false
+    }
+    draw(){
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
+    update(){
+        this.y += this.speed;
+
+        if(this.y > canvas.height) this.markForDeletion = true;
+    }
+}
+
+let Penaltys = [new Penalty(redMalus), new Penalty(purpleMalus)] 
+// let random = Math.floor(Math.random() * Penaltys.length)
+// let randomPenalty = Penaltys[random]
+// let currentPenalty = []; 
     
 function draw(){
     canvasBg();
@@ -367,17 +405,29 @@ function update(){
     moveBall();
     collisionBallBricks();
     collisionBallGreyBrick()
+    
 }
 
-function animate(){
+function animate(timeStamp){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-
     draw();
     update();
     showStats();
+
+    //concerne les malus
+
+    // let deltaTime = timeStamp - lastTime
+    // lastTime = timeStamp;
+    // timeToNextPenalty += deltaTime
+    // if(timeToNextPenalty > penaltynInterval){
+    //     currentPenalty.push(new Penalty(redMalus))
+    //     timeToNextPenalty = 0;
+    // }
+    
+    
     
     if(!gameOver)requestAnimationFrame(animate);
 }
-animate()
+animate(0)
 
 
