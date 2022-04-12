@@ -3,7 +3,7 @@
 
 //************** Audio **************
 const music1 = new Audio(src = 'ressources/audio/music1.ogg');
-music1.volume = 0;
+// music1.volume = 0;
 const paddleCollision = new Audio(src = 'ressources/audio/paddleSong.wav');
 const explosionBlock = new Audio(src = 'ressources/audio/explosionBlock.mp3');
 const ballCollision = new Audio(src = 'ressources/audio/ballSong.ogg');
