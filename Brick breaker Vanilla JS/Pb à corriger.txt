@@ -1,0 +1,1 @@
+collision avec les côté du block gris (la balle rentre à l'intérieur)

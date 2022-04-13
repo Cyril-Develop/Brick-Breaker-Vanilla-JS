@@ -142,17 +142,24 @@ function drawBall(){
 };
 
 function moveBall(){
-    if(!spaceBar){
-        if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH && !leftPressed){
-            ball.positionX += paddle.dx 
-        } 
-        if(leftPressed && paddle.positionX > 0 && !rightPressed) {
-            ball.positionX -= paddle.dx
-        } 
-    } else {
+    // if(!spaceBar){
+    //     if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH && !leftPressed){
+    //         ball.positionX += paddle.dx 
+    //     } 
+    //     if(leftPressed && paddle.positionX > 0 && !rightPressed) {
+    //         ball.positionX -= paddle.dx
+    //     } 
+    // } else {
+    //     ball.positionX += ball.directionX
+    //     ball.positionY += ball.directionY
+    // }
+    if(spaceBar) {
         ball.positionX += ball.directionX
         ball.positionY += ball.directionY
+    } else {
+        ball.positionX = paddle.positionX+PADDLE_WIDTH/2
     }
+    
     
     //************** Collision avec mur **************
     if(ball.positionX + ball.directionX > canvas.width - ball.radius || ball.positionX + ball.directionX < ball.radius) {
@@ -293,7 +300,7 @@ let greyBrickProp = {
     y : 400,
     x : (canvas.width - 1000) / 2,
     fillColor : '#D3D4CE',
-}    
+};
 
 function drawGreyBrick(){
     if(level == 2) {
@@ -303,16 +310,17 @@ function drawGreyBrick(){
         ctx.fill();
         ctx.closePath();
     }
-}
+};
 //************** Collision Ball brick incassable **************
 function collisionBallGreyBrick(){
     if(level == 2) {
         if(ball.positionX + ball.radius > greyBrickProp.x &&
-        ball.positionX - ball.radius < greyBrickProp.x + greyBrickProp.width &&
+        ball.positionX - ball.radius < greyBrickProp.x + greyBrickProp.width && 
         ball.positionY + ball.radius > greyBrickProp.y && 
-        ball.positionY - ball.radius < greyBrickProp.y + greyBrickProp.height) {
+            ball.positionY - ball.radius < greyBrickProp.y + greyBrickProp.height) {
+
             ball.directionY *= -1
-            
+   
         }
     } 
 };        
@@ -325,7 +333,7 @@ function nextLevel(){
        for(let c = 0; c < bricksProp.columns; c++) {
            isLevelUp = isLevelUp && !bricks[r][c].status;
        }
-   }
+   };
 
     if(isLevelUp){
         level++
@@ -338,7 +346,7 @@ function nextLevel(){
             gameOver = true
             btnRejouer.classList.add('active')
             return
-        }
+        };
         bricksProp.rows ++
         createBlueBricks();
   
@@ -347,42 +355,34 @@ function nextLevel(){
         resetBall();
         resetPaddle();
         
-        console.log(level);
         if(level == 2) {
             bgCanvas.src = 'ressources/img/BG2.png';
             canvasBg();
             
-        }
-            
+        };   
         if(level == 3) {
             bgCanvas.src = 'ressources/img/BG3.png';
             canvasBg();
-        }
-        
+            bricksProp.fillColor = 'purple'
+            createBlueBricks();
+        };
         if(level == 4) {
             bgCanvas.src = 'ressources/img/BG4.png';
             canvasBg();
             bgPaddle.src = 'ressources/img/paddleBG2.png';
             drawPaddle();
-        } 
+        };
     }
-}
+};
 
 //*********************** MALUS ********************************/
 setInterval(() => {
     //genere un nombre entre 0 et 1 toute les 4s
      let randomNumber = Math.floor(Math.random() * 2)
-     console.log(randomNumber);
-
     if(randomNumber == 0) {
         arrayMalus.push(new Malus())
     }
  }, 4000);
-
-let lastTime = 0;
-let timeToNextPenalty = 0;
-let penaltynInterval = 4000;
-
 
 class Malus {
     constructor(){
@@ -410,13 +410,15 @@ class Malus {
             this.height + this.y > paddle.positionY){ 
 
                 this.contactPenalty = true; 
-                penaltyCollision.play()
-                PADDLE_WIDTH = 125
-                setTimeout(() => {
-                    PADDLE_WIDTH = 250
-                    
-                    this.contactPenalty = false;
-                }, 10000); 
+                if(ball.positionY < paddle.positionY - 10) {
+                    penaltyCollision.play()
+                    PADDLE_WIDTH = 125
+                    setTimeout(() => {
+                        penaltyRemove.play()
+                        PADDLE_WIDTH = 250
+                        this.contactPenalty = false;
+                    }, 10000); 
+                }
             }
     }
 }
@@ -427,15 +429,15 @@ function generatePenalty(){
         penalty.draw()
         penalty.upadte()
     })
-}
+};
     
 function draw(){
     canvasBg();
     drawPaddle();
     drawBall();
-    drawBricks()
-    drawGreyBrick()
-    drawScore()
+    drawBricks();
+    drawGreyBrick();
+    drawScore();
 }
 
 function update(){
@@ -443,8 +445,7 @@ function update(){
     movePaddle();
     moveBall();
     collisionBallBricks();
-    collisionBallGreyBrick()
-    
+    collisionBallGreyBrick();
 }
 
 function animate(){
@@ -452,12 +453,12 @@ function animate(){
     draw();
     update();
     showStats();
-    generatePenalty()
+    generatePenalty() 
     
     arrayMalus = arrayMalus.filter(element => !element.markForDeletion )
  
     if(!gameOver)requestAnimationFrame(animate);
-}
+};
 animate()
 
 
