@@ -197,8 +197,8 @@ function moveBall(){
 
 //************** Bricks **************
 let bricksProp = {
-    columns : 1,
-    rows : 1,
+    columns : 15,
+    rows : 4,
     width : 75,
     height : 20,
     padding : 5,
@@ -339,18 +339,19 @@ function nextLevel(){
             btnRejouer.classList.add('active')
             return
         }
-        
+        bricksProp.rows ++
         createBlueBricks();
   
-        // la vitesse de la balle augmente pas
+        // la vitesse de la balle augmente pas !
         ball.velocity += 2;
         resetBall();
         resetPaddle();
-
+        
         console.log(level);
         if(level == 2) {
             bgCanvas.src = 'ressources/img/BG2.png';
             canvasBg();
+            
         }
             
         if(level == 3) {
@@ -365,6 +366,67 @@ function nextLevel(){
             drawPaddle();
         } 
     }
+}
+
+//*********************** MALUS ********************************/
+setInterval(() => {
+    //genere un nombre entre 0 et 1 toute les 4s
+     let randomNumber = Math.floor(Math.random() * 2)
+     console.log(randomNumber);
+
+    if(randomNumber == 0) {
+        arrayMalus.push(new Malus())
+    }
+ }, 4000);
+
+let lastTime = 0;
+let timeToNextPenalty = 0;
+let penaltynInterval = 4000;
+
+
+class Malus {
+    constructor(){
+        this.image = new Image()
+        this.image.src = 'ressources/img/redMalus.png'
+        this.width = 80;
+        this.height = 80;
+        this.x = Math.random() * (canvas.width - this.width);
+        this.y = 100;
+        this.speed = 3;
+        this.markForDeletion = false
+        this.contactPenalty = false
+    }
+    draw(){
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
+    upadte(){
+        this.y += this.speed;
+
+        if(this.y + this.height > canvas.height) this.markForDeletion = true;
+
+        if(this.x < paddle.positionX + PADDLE_WIDTH &&
+            this.x + this.width > paddle.positionX &&
+            this.y < paddle.positionY + PADDLE_HEIGHT &&
+            this.height + this.y > paddle.positionY){ 
+
+                this.contactPenalty = true; 
+                penaltyCollision.play()
+                PADDLE_WIDTH = 125
+                setTimeout(() => {
+                    PADDLE_WIDTH = 250
+                    
+                    this.contactPenalty = false;
+                }, 10000); 
+            }
+    }
+}
+let arrayMalus = []
+
+function generatePenalty(){
+    arrayMalus.forEach(penalty => {
+        penalty.draw()
+        penalty.upadte()
+    })
 }
     
 function draw(){
@@ -390,6 +452,9 @@ function animate(){
     draw();
     update();
     showStats();
+    generatePenalty()
+    
+    arrayMalus = arrayMalus.filter(element => !element.markForDeletion )
  
     if(!gameOver)requestAnimationFrame(animate);
 }

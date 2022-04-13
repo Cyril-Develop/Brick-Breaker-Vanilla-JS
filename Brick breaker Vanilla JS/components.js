@@ -11,6 +11,7 @@ const gameOverSong = new Audio(src = 'ressources/audio/gameOver.wav');
 const loseLife = new Audio(src = 'ressources/audio/loseLife.wav');
 const levelUp = new Audio(src = 'ressources/audio/nextLevel.mp3');
 const winGame = new Audio(src = 'ressources/audio/applause.wav');
+const penaltyCollision = new Audio(src = 'ressources/audio/penaltyCollision.mp3');
 
 
 
