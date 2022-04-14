@@ -410,7 +410,7 @@ class Malus {
             this.height + this.y > paddle.positionY){ 
 
                 this.contactPenalty = true; 
-                if(ball.positionY < paddle.positionY - 10) {
+                if(ball.positionY < paddle.positionY - 10 && PADDLE_WIDTH == 250) {
                     penaltyCollision.play()
                     PADDLE_WIDTH = 125
                     setTimeout(() => {
