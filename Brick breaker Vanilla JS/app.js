@@ -8,7 +8,6 @@ canvas.height = 850;
 
 //************** Score **************
 let score = 0;
-
 let level = 1;
 MAX_LEVEL = 5;
 
@@ -161,24 +160,12 @@ function drawBall(){
 };
 
 function moveBall(){
-    // if(!spaceBar){
-    //     if(rightPressed && paddle.positionX < canvas.width - PADDLE_WIDTH && !leftPressed){
-    //         ball.positionX += paddle.dx 
-    //     } 
-    //     if(leftPressed && paddle.positionX > 0 && !rightPressed) {
-    //         ball.positionX -= paddle.dx
-    //     } 
-    // } else {
-    //     ball.positionX += ball.directionX
-    //     ball.positionY += ball.directionY
-    // }
     if(spaceBar) {
         ball.positionX += ball.directionX
         ball.positionY += ball.directionY
     } else {
         ball.positionX = paddle.positionX+PADDLE_WIDTH/2
     }
-    
     
     //************** Collision avec mur **************
     if(ball.positionX + ball.directionX > canvas.width - ball.radius || ball.positionX + ball.directionX < ball.radius) {
@@ -444,6 +431,53 @@ class Malus {
 }
 let arrayMalus = []
 
+//*********************** Particules derriere la ball ********************************/
+let angle = 0;
+
+const arrayColor = ['#FA8072', '#B22222', '#CD5C5C', '#8B0000']
+
+class Particle{
+    constructor(){
+        this.x = ball.positionX;
+        this.y = ball.positionY;
+        this.speedY = (Math.random() * 2 ) - 1;
+        this.radius = Math.random() * 4 + 3;
+        this.color = arrayColor[Math.floor(Math.random() * arrayColor.length)]
+        
+    }
+    update(){
+        //let curve = Math.sin(angle) * 2;
+        this.y += this.speedY
+    }
+    draw(){
+        ctx.fillStyle = 'crimson';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
+    }
+};
+
+const arrayParticles = [];
+
+function generateParticles(){
+    if(spaceBar){
+        arrayParticles.unshift(new Particle())
+    } else {
+        arrayParticles.pop((new Particle()))
+    }
+    for(let i = 0; i < arrayParticles.length; i++) {
+        arrayParticles[i].update();
+        arrayParticles[i].draw();
+    }
+    if(arrayParticles.length > 30) {
+        for(let i = 0; i < 10; i++){
+            arrayParticles.pop(arrayParticles[i])
+        }
+    }
+};
+
+
 function generatePenalty(){
     arrayMalus.forEach(penalty => {
         penalty.draw()
@@ -473,10 +507,13 @@ function animate(){
     draw();
     update();
     showStats();
-    generatePenalty() 
-    
+    generatePenalty();
+    generateParticles();
+
     arrayMalus = arrayMalus.filter(element => !element.markForDeletion )
  
+    angle+=5;
+
     if(!gameOver)requestAnimationFrame(animate);
 };
 animate()
