@@ -440,8 +440,8 @@ class Particle{
     constructor(){
         this.x = ball.positionX;
         this.y = ball.positionY;
-        this.speedY = (Math.random() * 2 ) - 1;
-        this.radius = Math.random() * 4 + 3;
+        this.speedY = (Math.random() * 1 ) - 0.5;
+        this.radius = Math.random() * 3 + 2;
         this.color = arrayColor[Math.floor(Math.random() * arrayColor.length)]
         
     }
@@ -470,7 +470,7 @@ function generateParticles(){
         arrayParticles[i].update();
         arrayParticles[i].draw();
     }
-    if(arrayParticles.length > 30) {
+    if(arrayParticles.length > 50) {
         for(let i = 0; i < 10; i++){
             arrayParticles.pop(arrayParticles[i])
         }
