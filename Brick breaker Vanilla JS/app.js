@@ -8,6 +8,7 @@ canvas.height = 850;
 
 //************** Score **************
 let score = 0;
+
 let level = 1;
 MAX_LEVEL = 5;
 
@@ -30,9 +31,27 @@ function jouerMusic(){
     music1.play()
     document.getElementById('btnVolumeMute').addEventListener('click', () => {
         music1.volume = 0;
+        paddleCollision.volume = 0;
+        explosionBlock.volume = 0;
+        ballCollision.volume = 0;
+        gameOverSong.volume = 0;
+        loseLife.volume = 0;
+        levelUp.volume = 0;
+        winGame.volume = 0;
+        penaltyCollision.volume = 0;
+        penaltyRemove.volume = 0;
     })
     document.getElementById('btnVolumeOn').addEventListener('click', () => {
         music1.volume = 0.6;
+        paddleCollision.volume = 0.8;
+        explosionBlock.volume = 1;
+        ballCollision.volume = 0.8;
+        gameOverSong.volume = 0.8;
+        loseLife.volume = 0.8;
+        levelUp.volume = 0.8;
+        winGame.volume = 0.8;
+        penaltyCollision.volume = 0.8;
+        penaltyRemove.volume = 0.8;
     })
 };
 window.addEventListener('mousemove', jouerMusic); 
@@ -343,6 +362,7 @@ function nextLevel(){
             winGame.play();
             music1.pause()
             music1.volume = 0;
+            penaltyRemove.pause()
             gameOver = true
             btnRejouer.classList.add('active')
             return
