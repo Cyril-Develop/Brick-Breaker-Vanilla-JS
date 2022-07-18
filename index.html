@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Brick Breaker</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+
+        <canvas id="canvas"></canvas>
+        
+        <button id="btnRejouer">Rejouer</button>
+
+        <!-- <div id="levelIndicator"></div> -->
+
+        <div id="utilitaire">
+                <button id="btnRules"><img src="ressources/img/regle.svg"></button>
+                <button id="btnVolumeOn"><img src="ressources/img/SonOn.svg"></button>
+                <button id="btnVolumeMute"><img src="ressources/img/sonMute.svg"></button>
+            <div id="containerRules">
+                <div id="rules">
+                <p>Lancer la balle avec la barre espace et </p>
+                <p>déplacez la raquette avec &#8592; et &#8594;</p>
+                <p>Si la balle touche le bas du terrain de jeu vous perdez une vie.</p>
+                <p>La partie s'arrête lorsque vous n'avez plus de vie où lorsque vous terminez le niveau 4.</p>
+                </div>
+            </div>
+        </div>
+
+        
+        <script src="app.js"></script>
+        <script src="components.js"></script>
+    </body>
+</html>
